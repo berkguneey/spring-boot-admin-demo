@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=berk@domain.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+    networks:
+      - common
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - common
+  admin-application:
+    container_name: admin-application
+    image: admin-application
+    build: ./admin
+    ports:
+      - "1111:1111"
+    networks:
+      - common
+  demo-application:
+    container_name: demo-application
+    image: demo-application
+    build: ./demo
+    ports:
+      - "8080:8080"
+    networks:
+      - common
+    depends_on:
+      - admin-application
+      - postgres
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  common:
+    driver: bridge
